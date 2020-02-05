@@ -4,6 +4,10 @@
 	"Parameters": {
 		"env": {
 			"Type": "String"
+		},
+		"DynamoDBPhotoTableArn": {
+			"Type": "String",
+			"Default": "arn:aws:dynamodb:us-east-2:283311363519able/Sticker-otqawak535g6fhqu45pygaxkjm-master"
 		}
 	},
 	"Conditions": {
@@ -47,6 +51,11 @@
 					"Variables": {
 						"ENV": {
 							"Ref": "env"
+						},
+						"THUMBNAIL_WIDTH": "80",
+						"THUMBNAIL_HEIGHT": "80",
+						"DYNAMODB_PHOTOS_TABLE_ARN": {
+							"Ref": "DynamoDBPhotoTableArn"
 						}
 					}
 				},
@@ -60,7 +69,7 @@
 				"Timeout": "25",
 				"Code": {
 					"S3Bucket": "amplify-stickerzonian-master-221402-deployment",
-					"S3Key": "amplify-builds/S3Trigger2d87af12-4378326876374c656d70-build.zip"
+					"S3Key": "amplify-builds/S3Trigger2d87af12-69737167524e446f5368-build.zip"
 				}
 			}
 		},
@@ -141,6 +150,60 @@
 									}
 								]
 							}
+						}
+					]
+				}
+			}
+		},
+		"AllPrivsForDynamo": {
+			"DependsOn": [
+				"LambdaExecutionRole"
+			],
+			"Type": "AWS::IAM::Policy",
+			"Properties": {
+				"PolicyName": "AllPrivsForDynamo",
+				"Roles": [
+					{
+						"Ref": "LambdaExecutionRole"
+					}
+				],
+				"PolicyDocument": {
+					"Version": "2012-10-17",
+					"Statement": [
+						{
+							"Effect": "Allow",
+							"Action": [
+								"dynamodb:*"
+							],
+							"Resource": {
+								"Ref": "DynamoDBPhotoTableArn"
+							}
+						}
+					]
+				}
+			}
+		},
+		"RekognitionDetectLabels": {
+			"DependsOn": [
+				"LambdaExecutionRole"
+			],
+			"Type": "AWS::IAM::Policy",
+			"Properties": {
+				"PolicyName": "RekognitionDetectLabels",
+				"Roles": [
+					{
+						"Ref": "LambdaExecutionRole"
+					}
+				],
+				"PolicyDocument": {
+					"Version": "2012-10-17",
+					"Statement": [
+						{
+							"Effect": "Allow",
+							"Action": [
+								"rekognition:detectLabels"
+							],
+							"Resource": "*"
 						}
 					]
 				}
