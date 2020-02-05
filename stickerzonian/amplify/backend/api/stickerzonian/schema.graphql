@@ -1,7 +1,7 @@
 type Deck @model @auth(rules: [{allow: owner}]) {
     id: ID!
     name: String!
-    sticker: [Sticker] @connection(name: "StickersDeck")
+    stickers: [Sticker] @connection(name: "StickersDeck")
 }
 
 type Sticker @model @auth(rules: [{allow: owner}]) {

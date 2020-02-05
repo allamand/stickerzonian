@@ -159,7 +159,7 @@ Make change to `amplify/backend/api/stickerzonian/schema.graphql`
 type Deck @model @auth(rules: [{allow: owner}]) {
     id: ID!
     name: String!
-    sticker: [Sticker] @connection(name: "StickersDeck")
+    stickers: [Sticker] @connection(name: "StickersDeck")
 }
 
 type Sticker @model @auth(rules: [{allow: owner}]) {
@@ -269,5 +269,53 @@ npm install --save react-router-dom
 Update App.js
 
 ### Managing StickersDeck
+
+
+#### Adding cloud storage
+
+We need S3 storage to store the stickers we will upload in our decks.
+There is an Amplify storage module we can leverage for this.
+
+```
+amplify add storage
+```
+
+here what to put:
+```
+? Please select from one of the below mentioned services: Content (Images, audio, video, etc.)
+? Please provide a friendly name for your resource that will be used to label this category ? Please provide a friendly name for your resource that will be used to label this category 
+in the project: stickerzonian
+? Please provide bucket name: stickerzonian-sticker-bucket
+? Who should have access: Auth and guest users
+? What kind of access do you want for Authenticated users? create/update, read, delete
+? What kind of access do you want for Guest users? read
+? Do you want to add a Lambda Trigger for your S3 Bucket? Yes
+? Select from the following options Create a new function
+Successfully added resource S3Trigger2d87af12 locally
+? Do you want to edit the local S3Trigger2d87af12 lambda function now? No
+Successfully updated auth resource locally.
+Successfully added resource stickerzonian locally
+```
+
+Let's have amplify modify our cloud environment, provisionning the storage we just define
+
+```
+amplify push
+```
+
+After Cloudformation finished creating the resources, we have s3 bucket available for storing our stickers
+
+We need also to track that stickers must be part of the Sticker deck they are uploaded to, so we can 
+load all stickers from a particular deck.
+
+Let's create a new S3ImageUpload component.
+
+Install uuid dependency to manage file names
+
+```
+npm install --save uuid
+```
+
+Update src/App.js with uploading part.
 
 

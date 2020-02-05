@@ -1,13 +1,14 @@
 import React, { Component } from 'react';
 
-import { Grid, Header, Input, List, Segment } from 'semantic-ui-react';
+import { Divider, Form, Grid, Header, Input, List, Segment } from 'semantic-ui-react';
 import { BrowserRouter as Router, Route, NavLink } from 'react-router-dom';
+import { v4 as uuid } from 'uuid';
 
-import Amplify, { API, graphqlOperation } from 'aws-amplify';
-import { Connect, withAuthenticator } from 'aws-amplify-react';
+import Amplify, { API, Auth, graphqlOperation, Storage } from 'aws-amplify';
+import { Connect, S3Image, withAuthenticator } from 'aws-amplify-react';
 
-import logo from './logo.svg';
-import './App.css';
+//import logo from './logo.svg';
+//import './App.css';
 import aws_exports from './aws-exports';
 Amplify.configure(aws_exports);
 
@@ -44,13 +45,99 @@ const SubscribeToNewDecks = `
   }
 `;
 
-const GetDeck = `query GetDeck($id: ID!) {
-  getDeck(id: $id) {
+const GetDeck = `query GetDeck($id: ID!, $nextTokenForStickers: String) {
+    getDeck(id: $id) {
     id
     name
+    stickers(sortDirection: DESC, nextToken: $nextTokenForStickers) {
+      nextToken
+      items {
+        thumbnail {
+          width
+          height
+          key
+        }
+      }
+    }
   }
 }
 `;
+
+class S3ImageUpload extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { uploading: false }
+  }
+
+  uploadFile = async(file) => {
+    const fileName = uuid();
+    const user = await Auth.currentAuthenticatedUser();
+
+    const result = await Storage.put(
+      fileName,
+      file, {
+        customPrefix: { public: 'uploads/' },
+        metadata: { deckid: this.props.deckId, owner: user.username }
+      }
+    );
+
+    console.log('Uploaded sticker: ', result);
+  }
+
+  onChange = async(e) => {
+    this.setState({ uploading: true });
+
+    let files = [];
+    for (var i = 0; i < e.target.files.length; i++) {
+      files.push(e.target.files.item(i));
+    }
+    await Promise.all(files.map(f => this.uploadFile(f)));
+
+    this.setState({ uploading: false });
+  }
+
+  render() {
+    return (
+      <div>
+        <Form.Button
+          onClick={() => document.getElementById('add-sticker-file-input').click()}
+          disabled={this.state.uploading}
+          icon='file image outline'
+          content={ this.state.uploading ? 'Uploading...' : 'Add Stickers' }
+        />
+        <input
+          id='add-sticker-file-input'
+          type="file"
+          accept='image/*'
+          multiple
+          onChange={this.onChange}
+          style={{ display: 'none' }}
+        />
+      </div>
+    );
+  }
+}
+
+class StickersList extends React.Component {
+  stickerItems() {
+    return this.props.stickers.map(sticker =>
+      <S3Image 
+        key={sticker.thumbnail.key} 
+        imgKey={sticker.thumbnail.key.replace('public/', '')} 
+        style={{display: 'inline-block', 'paddingRight': '5px'}}
+      />
+    );
+  }
+
+  render() {
+    return (
+      <div>
+        <Divider hidden />
+        {this.stickerItems()}
+      </div>
+    );
+  }
+}
 
 
 class NewDeck extends Component {
@@ -123,27 +210,78 @@ class DecksList extends React.Component {
 
 
 class DeckDetailsLoader extends React.Component {
+  constructor(props) {
+    super(props);
+
+    console.log(util.inspect(this.props, false, null, false /* enable colors */ ));
+
+    this.state = {
+      nextTokenForStickers: null,
+      hasMoreStickers: true,
+      deck: null,
+      loading: true
+    }
+  }
+
+  async loadMoreStickers() {
+    if (!this.state.hasMoreStickers) return;
+
+    this.setState({ loading: true });
+    const { data } = await API.graphql(graphqlOperation(GetDeck, { id: this.props.id, nextTokenForStickers: this.state.nextTokenForStickers }));
+
+    let deck;
+    if (this.state.deck === null) {
+      deck = data.getDeck;
+    }
+    else {
+      deck = this.state.deck;
+      deck.stickers.items = deck.stickers.items.concat(data.getDeck.stickers.items);
+    }
+    this.setState({
+      deck: deck,
+      loading: false,
+      nextTokenForStickers: data.getDeck.stickers.nextToken,
+      hasMoreStickers: data.getDeck.stickers.nextToken !== null
+    });
+  }
+
+  componentDidMount() {
+    this.loadMoreStickers();
+  }
+
   render() {
     return (
-      <Connect query={graphqlOperation(GetDeck, { id: this.props.id })}>
-        {({ data, loading }) => {
-          if (loading) { return <div>Loading...</div>; }
-          if (!data.getDeck) return;
-
-          return <DeckDetails deck={data.getDeck} />;
-        }}
-      </Connect>
+      <DeckDetails 
+                loadingStickers={this.state.loading} 
+                deck={this.state.deck} 
+                loadMoreStickers={this.loadMoreStickers.bind(this)} 
+                hasMoreStickers={this.state.hasMoreStickers} 
+            />
     );
   }
 }
 
+//for debug
+const util = require('util')
+
 class DeckDetails extends Component {
   render() {
+    if (!this.props.deck) return 'Loading Sticker deck...' + util.inspect(this.props, false, null, false /* enable colors */ );
+
     return (
       <Segment>
         <Header as='h3'>{this.props.deck.name}</Header>
-        <p>TODO: Allow Sticker uploads</p>
-        <p>TODO: Show Stickers for this album</p>
+            <S3ImageUpload deckId={this.props.deck.id}/>        
+            <StickersList stickers={this.props.deck.stickers.items} />
+            {
+                this.props.hasMoreStickers && 
+                <Form.Button
+                onClick={this.props.loadMoreStickers}
+                icon='refresh'
+                disabled={this.props.loadingStickers}
+                content={this.props.loadingStickers ? 'Loading...' : 'Load more stickers'}
+                />
+            }
       </Segment>
     )
   }
