@@ -261,3 +261,13 @@ AppSync takes care of reading and persisting data (in this case, to DynamoDB).
 At this point, we have a web app that authenticates users and a secure GraphQL API endpoint 
 that lets us create and read Deck data. It’s time to connect the two together!
 
+from stickerzonian repo add:
+```
+npm install --save react-router-dom
+```
+
+Update App.js
+
+### Managing StickersDeck
+
+
