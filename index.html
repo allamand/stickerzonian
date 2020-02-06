@@ -55,26 +55,26 @@
 
         <ul class="nav nav-tabs" id="myTab" role="tablist">
           <li class="nav-item">
-            <a class="nav-link active" id="home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="home" aria-selected="true">Add Skill</a>
+            <a class="nav-link active" id="skill-tab" data-toggle="tab" href="#skill" role="tab" aria-controls="skill" aria-selected="true">Add Skill</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" id="profile-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="profile" aria-selected="false">Search Skill</a>
+            <a class="nav-link" id="search-tab" data-toggle="tab" href="#search" role="tab" aria-controls="search" aria-selected="false">Search Skill</a>
           </li>
           <li class="nav-item">
             <a class="nav-link" id="requested-tab" data-toggle="tab" href="#requested" role="tab" aria-controls="requested" aria-selected="false">Requested Skills</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" id="contact-tab" data-toggle="tab" href="#contact" role="tab" aria-controls="contact" aria-selected="false">Show ledger</a>
+            <a class="nav-link" id="ledger-tab" data-toggle="tab" href="#ledger" role="tab" aria-controls="ledger" aria-selected="false">Show ledger</a>
           </li>
         </ul>
     
         <div class="tab-content" id="myTabContent">
-          <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
+          <div class="tab-pane fade show active" id="skill" role="tabpanel" aria-labelledby="skill-tab">
             <div id="addskills">
                 <form>
                   <div class="form-group">
                     <label for="exampleFormControlInput1">Skill Name</label>
-                    <input type="text" class="form-control" id="SkillName" placeholder="EC2">
+                    <input type="text" class="form-control" id="SkillName" >
                   </div>
                   <div class="form-group">
                     <label for="exampleFormControlSelect1">Skill Level</label>
@@ -102,7 +102,7 @@
                   <th scope="col">Name</th>
                 </tr>
               </thead>
-              <tbody id="skills">
+              <tbody id="tbskills">
                 <tr>
                   <th scope="row">1</th>
                   <td>Mark</td>
@@ -111,19 +111,19 @@
               </tbody>
             </table>
           </div>
-          <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+          <div class="tab-pane fade" id="search" role="tabpanel" aria-labelledby="search-tab">
       
             <form>
               <div class="form-group">
                 <label for="exampleFormControlInput1">Search Skill</label>
-                <input type="text" class="form-control" id="SkillName" placeholder="EC2">
+                <input type="text" class="form-control" id="SearchName" placeholder="EC2">
               </div>
               
     
-            <button type="submit" class="btn btn-primary mb-2" onclick="createSkill()">Search</button>
+            <button type="submit" class="btn btn-primary mb-2" onclick="searchSkill()">Search</button>
           </form>
           
-          <table class="table" id="skill-table">
+          <table class="table" id="search-table">
             <thead>
               <tr>
                 <th scope="col">#</th>
@@ -134,7 +134,7 @@
                 <th scope="col">Request</th>
               </tr>
             </thead>
-            <tbody id="skills">
+            <tbody id="tbsearch">
               <tr>
                 <th scope="row">1</th>
                 <td>EC2</td>
@@ -150,7 +150,7 @@
 
           <div class="tab-pane fade" id="requested" role="tabpanel" aria-labelledby="requested-tab">
       
-            <table class="table" id="skill-table">
+            <table class="table" id="requested-table">
               <thead>
                 <tr>
                   <th scope="col">Skill</th>
@@ -158,7 +158,7 @@
                   <th scope="col">Date</th>
                 </tr>
               </thead>
-              <tbody id="skills">
+              <tbody id="tbrequested">
                 <tr>
                   <th scope="row">EC2</th>
                   <td>Hesham</td>
@@ -170,9 +170,9 @@
         </div>
 
           
-          <div class="tab-pane fade" id="contact" role="tabpanel" aria-labelledby="contact-tab">
+          <div class="tab-pane fade" id="ledger" role="tabpanel" aria-labelledby="ledger-tab">
       
-            <table class="table" id="skill-table">
+            <table class="table" id="ledger-table">
               <thead>
                 <tr>
                   <th scope="col">#</th>
@@ -180,7 +180,7 @@
                   <th scope="col">Purpose</th>
                 </tr>
               </thead>
-              <tbody id="skills">
+              <tbody id="tbledger">
                 <tr>
                   <th scope="row">1</th>
                   <td>1000</td>
@@ -274,6 +274,7 @@
  <script>
   window.onload = function() {
 
+//Add Skill
     var skillsTable = new AWS.DynamoDB({
       params: {
         TableName: 'Skills'
@@ -281,16 +282,41 @@
     });
 
     skillsTable.scan({}, function(err, data) {
-      var skills = document.getElementById('skills');
-      skills.innerHTML = "";
+      var elem = document.getElementById('tbskills');
+      elem.innerHTML = "";
 
       jQuery.each(data.Items, function(index, item) {
 
-        skills.innerHTML = skills.innerHTML + '<td>' + item['Id']['S']+ '</td><td>' + item['SkillName']['S'] + '</td><td>' + item['Rating']['S'] + '</td><td>' + item['Owner']['S']+ '</td>'
+        elem.innerHTML = elem.innerHTML + '<td>' + item['Id']['S']+ '</td><td>' + item['SkillName']['S'] + '</td><td>' + item['Rating']['S'] + '</td><td>' + item['Owner']['S']+ '</td>'
         console.log(item['Id']['S']);
       });
     });
 
+// Search Skill
+    var skillsTable = new AWS.DynamoDB({
+      params: {
+        TableName: 'Skills'
+      }
+    });
+
+    skillsTable.scan({}, function(err, data) {
+      var elem = document.getElementById('tbsearch');
+      var search = document.getElementById('SearchName').value;
+      elem.innerHTML = "";
+
+      jQuery.each(data.Items, function(index, item) {
+        if (item['SkillName']['S'] == 'SKI'){
+          elem.innerHTML = elem.innerHTML + '<td>' + item['Id']['S'] + '</td><td>' + 
+          item['SkillName']['S'] + '</td><td>' + 
+          item['Rating']['S'] + '</td><td>' + 
+          item['Owner']['S'] + '</td><td>' +
+          '<td><button class="btn btn-secondary" onclick="createRequest("'+item['Id']['S']+'")">Request</button></td>'
+        }
+        
+      });
+    });
+
+//Requested Skills
     var requestsTable = new AWS.DynamoDB({
       params: {
         TableName: 'Request'
@@ -298,33 +324,17 @@
     });
 
     requestsTable.scan({}, function(err, data) {
-      var skills = document.getElementById('requests');
-      skills.innerHTML = "";
+      var elem = document.getElementById('requests');
+      elem.innerHTML = "";
 
       jQuery.each(data.Items, function(index, item) {
 
-        skills.innerHTML = '<div>' + item['Id']['S'] + '</div><div>' + item['Owner']['S'] + '</div><div>' + item['Accepted']['S'] + '</div><div>' + item['RequestedFrom']['S'] + '</div><div>' + item['Validated']['S'] + '</div>'
+        elem.innerHTML = '<div>' + item['Id']['S'] + '</div><div>' + item['Owner']['S'] + '</div><div>' + item['Accepted']['S'] + '</div><div>' + item['RequestedFrom']['S'] + '</div><div>' + item['Validated']['S'] + '</div>'
 
       });
     });
 
-    var requestsTable = new AWS.DynamoDB({
-      params: {
-        TableName: 'Request'
-      }
-    });
-
-    requestsTable.scan({}, function(err, data) {
-      var skills = document.getElementById('requests');
-      skills.innerHTML = "";
-
-      jQuery.each(data.Items, function(index, item) {
-
-        skills.innerHTML = '<div>' + item['Id']['S'] + '</div><div>' + item['Owner']['S'] + '</div><div>' + item['Accepted']['S'] + '</div><div>' + item['RequestedFrom']['S'] + '</div><div>' + item['Validated']['S'] + '</div>'
-
-      });
-    });
-
+// Show Ledger
     var ledgerTable = new AWS.DynamoDB({
       params: {
         TableName: 'KudoLedger'
@@ -332,12 +342,12 @@
     });
 
     ledgerTable.scan({}, function(err, data) {
-      var skills = document.getElementById('Ledger');
-      skills.innerHTML = "";
+      var elem = document.getElementById('tbledger');
+      elem.innerHTML = "";
 
       jQuery.each(data.Items, function(index, item) {
 
-        skills.innerHTML = '<div>' + item['Id']['S'] + '</div><div>' + item['Owner']['S'] + '</div><div>' + item['Purpose']['S'] + '</div><div>' + item['Value']['N'] + '</div>'
+        elem.innerHTML = '<div>' + item['Id']['S'] + '</div><div>' + item['Owner']['S'] + '</div><div>' + item['Purpose']['S'] + '</div><div>' + item['Value']['N'] + '</div>'
 
       });
     });
@@ -374,6 +384,34 @@
 
   }
 
+  function searchSkill() {
+    var owner = document.getElementById("Owner").value;
+    var skillname = document.getElementById('SearchName').value;
+    var rating = "" + document.getElementById('Rating').value;
+
+    var docClient = new AWS.DynamoDB.DocumentClient();
+
+    var params = {
+      TableName: 'Skills',
+      Item: {
+        "Id": uuidv4(),
+        "SkillName": skillname,
+        "Rating": rating,
+        "Owner": owner
+      }
+
+    }
+    console.log(params);
+    docClient.get(params, function(err, data) {
+      if (err) {
+        console.error("Unable to read item. Error JSON:", JSON.stringify(err, null, 2));
+      } else {
+        console.log("Get item:", JSON.stringify(data, null, 2));
+      }
+    });
+    location.reload();
+
+  }
 
   function uuidv4() {
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
