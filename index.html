@@ -119,6 +119,29 @@
     
             <button type="submit" class="btn btn-primary mb-2" onclick="createSkill()">Search</button>
           </form>
+
+          <table class="table" id="skill-table">
+            <thead>
+              <tr>
+                <th scope="col">#</th>
+                <th scope="col">Skill</th>
+                <th scope="col">Name</th>
+                <th scope="col">Rating</th>
+                <th scope="col">Kudo</th>
+                <th scope="col">Request</th>
+              </tr>
+            </thead>
+            <tbody id="skills">
+              <tr>
+                <th scope="row">1</th>
+                <td>EC2</td>
+                <td>Sascha</td>
+                <td>101</td>
+                <td>10</td>
+                <td><button class="btn btn-secondary" onclick="createRequest()">Request</button></td>
+              </tr>
+            </tbody>
+          </table>
       
           </div>
           <div class="tab-pane fade" id="contact" role="tabpanel" aria-labelledby="contact-tab">
