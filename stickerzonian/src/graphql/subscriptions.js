@@ -6,15 +6,17 @@ export const onCreateDeck = /* GraphQL */ `
     onCreateDeck(owner: $owner) {
       id
       name
+      owner
+      members
       stickers {
         items {
           id
           bucket
+          labels
           owner
         }
         nextToken
       }
-      owner
     }
   }
 `;
@@ -23,15 +25,17 @@ export const onUpdateDeck = /* GraphQL */ `
     onUpdateDeck(owner: $owner) {
       id
       name
+      owner
+      members
       stickers {
         items {
           id
           bucket
+          labels
           owner
         }
         nextToken
       }
-      owner
     }
   }
 `;
@@ -40,15 +44,17 @@ export const onDeleteDeck = /* GraphQL */ `
     onDeleteDeck(owner: $owner) {
       id
       name
+      owner
+      members
       stickers {
         items {
           id
           bucket
+          labels
           owner
         }
         nextToken
       }
-      owner
     }
   }
 `;
@@ -59,10 +65,11 @@ export const onCreateSticker = /* GraphQL */ `
       deck {
         id
         name
+        owner
+        members
         stickers {
           nextToken
         }
-        owner
       }
       bucket
       fullsize {
@@ -75,6 +82,7 @@ export const onCreateSticker = /* GraphQL */ `
         width
         height
       }
+      labels
       owner
     }
   }
@@ -86,10 +94,11 @@ export const onUpdateSticker = /* GraphQL */ `
       deck {
         id
         name
+        owner
+        members
         stickers {
           nextToken
         }
-        owner
       }
       bucket
       fullsize {
@@ -102,6 +111,7 @@ export const onUpdateSticker = /* GraphQL */ `
         width
         height
       }
+      labels
       owner
     }
   }
@@ -113,10 +123,11 @@ export const onDeleteSticker = /* GraphQL */ `
       deck {
         id
         name
+        owner
+        members
         stickers {
           nextToken
         }
-        owner
       }
       bucket
       fullsize {
@@ -129,6 +140,7 @@ export const onDeleteSticker = /* GraphQL */ `
         width
         height
       }
+      labels
       owner
     }
   }

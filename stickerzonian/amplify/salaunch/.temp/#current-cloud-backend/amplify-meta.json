@@ -1,0 +1,130 @@
+{
+	"providers": {
+		"awscloudformation": {
+			"AuthRoleName": "amplify-stickerzonian-salaunch-95750-authRole",
+			"UnauthRoleArn": "arn:aws:iam::283311363519:role/amplify-stickerzonian-salaunch-95750-unauthRole",
+			"AuthRoleArn": "arn:aws:iam::283311363519:role/amplify-stickerzonian-salaunch-95750-authRole",
+			"Region": "us-east-2",
+			"DeploymentBucketName": "amplify-stickerzonian-salaunch-95750-deployment",
+			"UnauthRoleName": "amplify-stickerzonian-salaunch-95750-unauthRole",
+			"StackName": "amplify-stickerzonian-salaunch-95750",
+			"StackId": "arn:aws:cloudformation:us-east-2:283311363519:stack/amplify-stickerzonian-salaunch-95750/2359a230-48c7-11ea-8a6c-0a8046302794",
+			"AmplifyAppId": "dc7t3gge4lsce"
+		}
+	},
+	"auth": {
+		"stickerzonian0e06aea5": {
+			"service": "Cognito",
+			"providerPlugin": "awscloudformation",
+			"dependsOn": [],
+			"customAuth": false,
+			"providerMetadata": {
+				"s3TemplateURL": "https://s3.amazonaws.com/amplify-stickerzonian-salaunch-95750-deployment/amplify-cfn-templates/auth/stickerzonian0e06aea5-cloudformation-template.yml",
+				"logicalId": "authstickerzonian0e06aea5"
+			},
+			"lastPushTimeStamp": "2020-02-06T16:23:24.274Z",
+			"output": {
+				"AppClientSecret": "iej8u6f8vhd852basr996ulihj2okgjm06itcb8gsjb21cbrokn",
+				"UserPoolId": "us-east-2_WAsxzamRX",
+				"AppClientIDWeb": "26qu41i2k2i3gfvmejketjkoqu",
+				"AppClientID": "5ue6bpr6u29iqfkii9s2s3niue",
+				"IdentityPoolId": "us-east-2:b106c796-183b-46d7-8183-89f6a157698c",
+				"IdentityPoolName": "stickerzonian0e06aea5_identitypool_0e06aea5__salaunch",
+				"UserPoolName": "stickerzonian0e06aea5_userpool_0e06aea5"
+			},
+			"lastPushDirHash": "oCJu6xFfHkhePkNxBBpwqrCkj2I="
+		}
+	},
+	"api": {
+		"stickerzonian": {
+			"service": "AppSync",
+			"providerPlugin": "awscloudformation",
+			"output": {
+				"authConfig": {
+					"additionalAuthenticationProviders": [],
+					"defaultAuthentication": {
+						"authenticationType": "AMAZON_COGNITO_USER_POOLS",
+						"userPoolConfig": {
+							"userPoolId": "authstickerzonian0e06aea5"
+						}
+					}
+				},
+				"GraphQLAPIIdOutput": "nrx24pf44jeffloarpsoif7awa",
+				"GraphQLAPIEndpointOutput": "https://tmhsoyhb3vadflkhhotztwuaju.appsync-api.us-east-2.amazonaws.com/graphql"
+			},
+			"providerMetadata": {
+				"s3TemplateURL": "https://s3.amazonaws.com/amplify-stickerzonian-salaunch-95750-deployment/amplify-cfn-templates/api/cloudformation-template.json",
+				"logicalId": "apistickerzonian"
+			},
+			"lastPushTimeStamp": "2020-02-06T16:23:24.276Z",
+			"lastPushDirHash": "LY7NkO7gGpTiI1ZAzAoCS1tLKYM="
+		}
+	},
+	"function": {
+		"S3Trigger5ca05ac6": {
+			"service": "Lambda",
+			"providerPlugin": "awscloudformation",
+			"build": true,
+			"lastBuildTimeStamp": "2020-02-06T15:12:40.817Z",
+			"lastPackageTimeStamp": "2020-02-06T15:50:13.430Z",
+			"distZipFilename": "S3Trigger5ca05ac6-44634f3157584f413847-build.zip",
+			"providerMetadata": {
+				"s3TemplateURL": "https://s3.amazonaws.com/amplify-stickerzonian-salaunch-95750-deployment/amplify-cfn-templates/function/S3Trigger5ca05ac6-cloudformation-template.json",
+				"logicalId": "functionS3Trigger5ca05ac6"
+			},
+			"lastPushTimeStamp": "2020-02-06T16:23:24.282Z",
+			"output": {
+				"Region": "us-east-2",
+				"Arn": "arn:aws:lambda:us-east-2:283311363519:function:S3Trigger5ca05ac6-salaunch",
+				"Name": "S3Trigger5ca05ac6-salaunch",
+				"LambdaExecutionRole": "S3Trigger5ca05ac6LambdaRole66924eb7-salaunch"
+			},
+			"lastPushDirHash": "7ka7o3S/n9N95pdLvwwWtE/zaQA="
+		}
+	},
+	"storage": {
+		"stickerzonian": {
+			"service": "S3",
+			"providerPlugin": "awscloudformation",
+			"dependsOn": [
+				{
+					"category": "function",
+					"resourceName": "S3Trigger5ca05ac6",
+					"attributes": [
+						"Name",
+						"Arn",
+						"LambdaExecutionRole"
+					]
+				}
+			],
+			"output": {
+				"BucketName": "stickerzonian-salaunch95750-salaunch",
+				"Region": "us-east-2"
+			},
+			"lastPushTimeStamp": "2020-02-06T16:23:24.282Z",
+			"providerMetadata": {
+				"s3TemplateURL": "https://s3.amazonaws.com/amplify-stickerzonian-salaunch-95750-deployment/amplify-cfn-templates/storage/s3-cloudformation-template.json",
+				"logicalId": "storagestickerzonian"
+			},
+			"lastPushDirHash": "4N7FQRRzwp06YCUP3CZA6j9zcp0="
+		}
+	},
+	"hosting": {
+		"S3AndCloudFront": {
+			"service": "S3AndCloudFront",
+			"providerPlugin": "awscloudformation",
+			"providerMetadata": {
+				"s3TemplateURL": "https://s3.amazonaws.com/amplify-stickerzonian-salaunch-95750-deployment/amplify-cfn-templates/hosting/template.json",
+				"logicalId": "hostingS3AndCloudFront"
+			},
+			"lastPushTimeStamp": "2020-02-06T16:23:24.279Z",
+			"output": {
+				"S3BucketSecureURL": "https://stickerzonian-20200206114504-hostingbucket-salaunch.s3.amazonaws.com",
+				"WebsiteURL": "http://stickerzonian-20200206114504-hostingbucket-salaunch.s3-website.us-east-2.amazonaws.com",
+				"Region": "us-east-2",
+				"HostingBucketName": "stickerzonian-20200206114504-hostingbucket-salaunch"
+			},
+			"lastPushDirHash": "9CwjZ3NKj0PpWEeHm2ZdyaZ1mEE="
+		}
+	}
+}

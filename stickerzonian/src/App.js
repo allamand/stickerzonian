@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 
-import { Divider, Form, Grid, Header, Input, List, Segment } from 'semantic-ui-react';
+import { Container, Divider, Form, Grid, Header, Icon, Input, List, Modal, Segment } from 'semantic-ui-react';
 import { BrowserRouter as Router, Route, NavLink } from 'react-router-dom';
 import { v4 as uuid } from 'uuid';
 
@@ -45,14 +45,32 @@ const SubscribeToNewDecks = `
   }
 `;
 
+const SubscribeToUpdatedDecks = `
+  subscription OnUpdateDeck {
+    onUpdateDeck {
+      id
+      name
+      owner
+      members
+    }
+  }
+`;
+
 const GetDeck = `query GetDeck($id: ID!, $nextTokenForStickers: String) {
     getDeck(id: $id) {
     id
     name
+    owner
+    members
     stickers(sortDirection: DESC, nextToken: $nextTokenForStickers) {
       nextToken
       items {
         thumbnail {
+          width
+          height
+          key
+        }
+        fullsize {
           width
           height
           key
@@ -62,6 +80,85 @@ const GetDeck = `query GetDeck($id: ID!, $nextTokenForStickers: String) {
   }
 }
 `;
+
+const SearchStickers = `query SearchStickers($label: String!) {
+  searchStickers(filter: { labels: { match: $label }}) {
+    items {
+      id
+      bucket
+      thumbnail {
+          key
+          width
+          height
+      }
+      fullsize {
+          key
+          width
+          height
+      }
+    }
+  }
+}`;
+
+class Search extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      stickers: [],
+      deck: null,
+      label: '',
+      hasResults: false,
+      searched: false
+    }
+  }
+
+  updateLabel = (e) => {
+    this.setState({ label: e.target.value, searched: false });
+  }
+
+  getStickersForLabel = async(e) => {
+    const result = await API.graphql(graphqlOperation(SearchStickers, { label: this.state.label }));
+    let stickers = [];
+    let label = '';
+    let hasResults = false;
+    if (result.data.searchStickers.items.length !== 0) {
+      hasResults = true;
+      stickers = result.data.searchStickers.items;
+      label = this.state.label;
+    }
+    const searchResults = { label, stickers }
+    this.setState({ searchResults, hasResults, searched: true });
+  }
+
+  noResults() {
+    return !this.state.searched ?
+      '' :
+      <Header as='h4' color='grey'>No stickers found matching '{this.state.label}'</Header>
+  }
+
+  render() {
+    return (
+      <Segment>
+            <Input
+              type='text'
+              placeholder='Search for stickers'
+              icon='search'
+              iconPosition='left'
+              action={{ content: 'Search', onClick: this.getStickersForLabel }}
+              name='label'
+              value={this.state.label}
+              onChange={this.updateLabel}
+            />
+            {
+                this.state.hasResults 
+                ? <StickersList stickers={this.state.searchResults.stickers} />
+                : this.noResults()
+            }
+          </Segment>
+    );
+  }
+}
+
 
 class S3ImageUpload extends React.Component {
   constructor(props) {
@@ -119,12 +216,32 @@ class S3ImageUpload extends React.Component {
 }
 
 class StickersList extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      selectedSticker: null
+    };
+  }
+
+  handleStickerClick = (sticker) => {
+    this.setState({
+      selectedSticker: sticker
+    });
+  }
+
+  handleLightboxClose = () => {
+    this.setState({
+      selectedSticker: null
+    });
+  }
+
   stickerItems() {
     return this.props.stickers.map(sticker =>
       <S3Image 
         key={sticker.thumbnail.key} 
         imgKey={sticker.thumbnail.key.replace('public/', '')} 
         style={{display: 'inline-block', 'paddingRight': '5px'}}
+        onClick={this.handlePhotoClick.bind(this, sticker.fullsize)}
       />
     );
   }
@@ -134,6 +251,7 @@ class StickersList extends React.Component {
       <div>
         <Divider hidden />
         {this.stickerItems()}
+        <Lightbox sticker={this.state.selectedSticker} onClose={this.handleLightboxClose} />
       </div>
     );
   }
@@ -247,7 +365,25 @@ class DeckDetailsLoader extends React.Component {
 
   componentDidMount() {
     this.loadMoreStickers();
+
+    const subscription = API.graphql(graphqlOperation(SubscribeToUpdatedDecks)).subscribe({
+      next: (update) => {
+        const deck = update.value.data.onUpdateDeck;
+        this.setState({
+          deck: Object.assign(this.state.deck, deck)
+        })
+      }
+    });
+
+    this.setState({
+      deckUpdatesSubscription: subscription
+    })
   }
+
+  componentWillUnmount() {
+    this.state.deckUpdatesSubscription.unsubscribe();
+  }
+
 
   render() {
     return (
@@ -261,16 +397,60 @@ class DeckDetailsLoader extends React.Component {
   }
 }
 
+class Lightbox extends Component {
+  render() {
+    return (
+      <Modal 
+        open={this.props.sticker !== null} 
+        onClose={this.props.onClose}
+      >
+        <Modal.Content>
+          <Container textAlign='center'>
+            { 
+              this.props.sticker? 
+              <S3Image 
+                imgKey={this.props.sticker.key.replace('public/', '')} 
+                theme={{ stickerImg: { maxWidth: '100%' } }}
+                onClick={this.props.onClose}
+              /> :
+              null 
+            }
+          </Container>
+        </Modal.Content>
+      </Modal>
+    );
+  }
+}
+
 //for debug
 const util = require('util')
 
 class DeckDetails extends Component {
+  async componentDidMount() {
+    this.setState({
+      currentUser: await Auth.currentAuthenticatedUser()
+    });
+  }
   render() {
     if (!this.props.deck) return 'Loading Sticker deck...' + util.inspect(this.props, false, null, false /* enable colors */ );
 
     return (
       <Segment>
         <Header as='h3'>{this.props.deck.name}</Header>
+        
+         {
+                this.state.currentUser.username === this.props.deck.owner
+                &&
+                <Segment.Group>
+                  <Segment>
+                    <DeckMembers members={this.props.deck.members} />
+                  </Segment>
+                  <Segment basic>
+                    <AddUsernameToDeck deckId={this.props.deck.id} />
+                  </Segment>
+                </Segment.Group>
+              }
+              
             <S3ImageUpload deckId={this.props.deck.id}/>        
             <StickersList stickers={this.props.deck.stickers.items} />
             {
@@ -314,17 +494,75 @@ class DecksListLoader extends React.Component {
   }
 }
 
-/*
-      <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-           <Header as='h1'>StickerZonian.</Header>
-        </p>
+class AddUsernameToDeck extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { username: '' };
+  }
 
-      </header>
-    </div>
-*/
+  handleChange = (e, { name, value }) => this.setState({
+    [name]: value
+  })
+
+  handleSubmit = async(event) => {
+    event.preventDefault();
+
+    const { data } = await API.graphql(graphqlOperation(GetDeck, { id: this.props.deckId }));
+
+    let updatedDeck = data.getDeck;
+    const updatedMembers = (data.getDeck.members || []).concat([this.state.username]);
+    updatedDeck.members = updatedMembers;
+    const { id, name, owner, members } = updatedDeck;
+    const updatedDeckInput = { id, name, owner, members };
+
+    const UpdateDeck = `mutation UpdateDeck($input: UpdateDeckInput!) {
+      updateDeck(input: $input) {
+        id
+        members
+      }
+    }
+    `;
+
+    const result = await API.graphql(graphqlOperation(UpdateDeck, { input: updatedDeckInput }));
+
+    console.log(`Added ${this.state.username} to deck id ${result.data.updateDeck.id}`);
+
+    this.setState({ username: '' });
+  }
+
+  render() {
+    return (
+      <Input
+        type='text'
+        placeholder='Username'
+        icon='user plus'
+        iconPosition='left'
+        action={{ content: 'Add', onClick: this.handleSubmit }}
+        name='username'
+        value={this.state.username}
+        onChange={this.handleChange}
+      />
+    )
+  }
+}
+
+const DeckMembers = (props) => (
+  <div>
+    <Header as='h4'>
+      <Icon name='user circle' />
+      <Header.Content>Members</Header.Content>
+    </Header>
+    {
+      props.members
+      ? <List bulleted> 
+          {props.members && props.members.map((member) => <List.Item key={member}>{member}</List.Item>)}
+        </List>
+      : 'No members yet (besides you). Invite someone below!'
+    }
+  </div>
+);
+
+
 
 class App extends Component {
   render() {
@@ -334,6 +572,7 @@ class App extends Component {
           <Grid.Column>
             <Route path="/" exact component={NewDeck}/>
             <Route path="/" exact component={DecksListLoader}/>
+            <Route path="/" exact component={Search}/>
 
             <Route
               path="/decks/:deckId"

@@ -18,11 +18,12 @@ const THUMBNAIL_WIDTH = parseInt(process.env.THUMBNAIL_WIDTH, 10);
 const THUMBNAIL_HEIGHT = parseInt(process.env.THUMBNAIL_HEIGHT, 10);
 const DYNAMODB_PHOTOS_TABLE_NAME = process.env.DYNAMODB_PHOTOS_TABLE_ARN.split('/')[1];
 
-function storePhotoInfo(item) {
+function storeStickerInfo(item) {
   const params = {
     Item: item,
     TableName: DYNAMODB_PHOTOS_TABLE_NAME
   };
+  console.log("store " + item);
   return DynamoDBDocClient.put(params).promise();
 }
 
@@ -39,28 +40,28 @@ function fullsizeKey(filename) {
   return `public/${filename}`;
 }
 
-function makeThumbnail(photo) {
-  return Sharp(photo).resize(THUMBNAIL_WIDTH, THUMBNAIL_HEIGHT).toBuffer();
+function makeThumbnail(sticker) {
+  return Sharp(sticker).resize(THUMBNAIL_WIDTH, THUMBNAIL_HEIGHT).toBuffer();
 }
 
 async function resize(bucketName, key) {
-  const originalPhoto = (await S3.getObject({ Bucket: bucketName, Key: key }).promise()).Body;
-  const originalPhotoName = key.replace('uploads/', '');
-  const originalPhotoDimensions = await Sharp(originalPhoto).metadata();
+  const originalSticker = (await S3.getObject({ Bucket: bucketName, Key: key }).promise()).Body;
+  const originalStickerName = key.replace('uploads/', '');
+  const originalStickerDimensions = await Sharp(originalSticker).metadata();
 
-  const thumbnail = await makeThumbnail(originalPhoto);
+  const thumbnail = await makeThumbnail(originalSticker);
 
   await Promise.all([
     S3.putObject({
       Body: thumbnail,
       Bucket: bucketName,
-      Key: thumbnailKey(originalPhotoName),
+      Key: thumbnailKey(originalStickerName),
     }).promise(),
 
     S3.copyObject({
       Bucket: bucketName,
       CopySource: bucketName + '/' + key,
-      Key: fullsizeKey(originalPhotoName),
+      Key: fullsizeKey(originalStickerName),
     }).promise(),
   ]);
 
@@ -70,21 +71,21 @@ async function resize(bucketName, key) {
   }).promise();
 
   return {
-    photoId: originalPhotoName,
+    StickerId: originalStickerName,
 
     thumbnail: {
-      key: thumbnailKey(originalPhotoName),
+      key: thumbnailKey(originalStickerName),
       width: THUMBNAIL_WIDTH,
       height: THUMBNAIL_HEIGHT
     },
 
     fullsize: {
-      key: fullsizeKey(originalPhotoName),
-      width: originalPhotoDimensions.width,
-      height: originalPhotoDimensions.height
+      key: fullsizeKey(originalStickerName),
+      width: originalStickerDimensions.width,
+      height: originalStickerDimensions.height
     }
   };
-};
+}
 
 async function processRecord(record) {
   const bucketName = record.s3.bucket.name;
@@ -98,19 +99,19 @@ async function processRecord(record) {
   const item = {
     id: id,
     owner: metadata.owner,
-    photoAlbumId: metadata.albumid,
+    stickerDeckId: metadata.deckid,
     bucket: bucketName,
     thumbnail: sizes.thumbnail,
     fullsize: sizes.fullsize,
     createdAt: new Date().getTime()
-  }
-  await storePhotoInfo(item);
+  };
+  await storeStickerInfo(item);
 }
 
 exports.handler = async(event, context, callback) => {
   try {
     event.Records.forEach(processRecord);
-    callback(null, { status: 'Photo Processed' });
+    callback(null, { status: 'Sticker Processed' });
   }
   catch (err) {
     console.error(err);
