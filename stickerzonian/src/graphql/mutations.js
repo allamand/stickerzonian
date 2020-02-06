@@ -9,15 +9,17 @@ export const createDeck = /* GraphQL */ `
     createDeck(input: $input, condition: $condition) {
       id
       name
+      owner
+      members
       stickers {
         items {
           id
           bucket
+          labels
           owner
         }
         nextToken
       }
-      owner
     }
   }
 `;
@@ -29,15 +31,17 @@ export const updateDeck = /* GraphQL */ `
     updateDeck(input: $input, condition: $condition) {
       id
       name
+      owner
+      members
       stickers {
         items {
           id
           bucket
+          labels
           owner
         }
         nextToken
       }
-      owner
     }
   }
 `;
@@ -49,15 +53,17 @@ export const deleteDeck = /* GraphQL */ `
     deleteDeck(input: $input, condition: $condition) {
       id
       name
+      owner
+      members
       stickers {
         items {
           id
           bucket
+          labels
           owner
         }
         nextToken
       }
-      owner
     }
   }
 `;
@@ -71,10 +77,11 @@ export const createSticker = /* GraphQL */ `
       deck {
         id
         name
+        owner
+        members
         stickers {
           nextToken
         }
-        owner
       }
       bucket
       fullsize {
@@ -87,6 +94,7 @@ export const createSticker = /* GraphQL */ `
         width
         height
       }
+      labels
       owner
     }
   }
@@ -101,10 +109,11 @@ export const updateSticker = /* GraphQL */ `
       deck {
         id
         name
+        owner
+        members
         stickers {
           nextToken
         }
-        owner
       }
       bucket
       fullsize {
@@ -117,6 +126,7 @@ export const updateSticker = /* GraphQL */ `
         width
         height
       }
+      labels
       owner
     }
   }
@@ -131,10 +141,11 @@ export const deleteSticker = /* GraphQL */ `
       deck {
         id
         name
+        owner
+        members
         stickers {
           nextToken
         }
-        owner
       }
       bucket
       fullsize {
@@ -147,6 +158,7 @@ export const deleteSticker = /* GraphQL */ `
         width
         height
       }
+      labels
       owner
     }
   }

@@ -68,7 +68,7 @@
 				"Runtime": "nodejs10.x",
 				"Timeout": "25",
 				"Code": {
-					"S3Bucket": "amplify-stickerzonian-sa-171702-deployment",
+					"S3Bucket": "amplify-stickerzonian-salaunch-95750-deployment",
 					"S3Key": "amplify-builds/S3Trigger5ca05ac6-44634f3157584f413847-build.zip"
 				}
 			}
