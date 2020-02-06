@@ -32,126 +32,97 @@
         }
       }
     </style>
-    <!-- Custom styles for this template -->
-    <link href="album.css" rel="stylesheet">
+
   </head>
   <body>
     <header>
-  <div class="collapse bg-dark" id="navbarHeader">
-    <div class="container">
-      <div class="row">
-        <div class="col-sm-8 col-md-7 py-4">
-          <h4 class="text-white">About</h4>
-          <p class="text-muted">Add some information about the album below, the author, or any other background context. Make it a few sentences long so folks can pick up some informative tidbits. Then, link them off to some social networking sites or contact information.</p>
-        </div>
-        <div class="col-sm-4 offset-md-1 py-4">
-          <h4 class="text-white">Contact</h4>
-          <ul class="list-unstyled">
-            <li><a href="#" class="text-white">Follow on Twitter</a></li>
-            <li><a href="#" class="text-white">Like on Facebook</a></li>
-            <li><a href="#" class="text-white">Email me</a></li>
-          </ul>
-        </div>
-      </div>
-    </div>
-  </div>
+  
   <div class="navbar navbar-dark bg-dark shadow-sm">
     <div class="container d-flex justify-content-between">
       <a href="#" class="navbar-brand d-flex align-items-center">
         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" aria-hidden="true" class="mr-2" viewBox="0 0 24 24" focusable="false"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-        <strong>Album</strong>
+        <strong>digitalKudos</strong>
       </a>
-      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarHeader" aria-controls="navbarHeader" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
+    
     </div>
   </div>
 </header>
 
 <main role="main">
 
-
-
   <div class="album py-5 bg-light">
     <div class="container">
 
-      <ul class="nav nav-tabs" id="myTab" role="tablist">
-        <li class="nav-item">
-          <a class="nav-link active" id="home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="home" aria-selected="true">Add Skill</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" id="profile-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="profile" aria-selected="false">Search Skill</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" id="contact-tab" data-toggle="tab" href="#contact" role="tab" aria-controls="contact" aria-selected="false">Show ledger</a>
-        </li>
-      </ul>
+        <ul class="nav nav-tabs" id="myTab" role="tablist">
+          <li class="nav-item">
+            <a class="nav-link active" id="home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="home" aria-selected="true">Add Skill</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" id="profile-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="profile" aria-selected="false">Search Skill</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" id="contact-tab" data-toggle="tab" href="#contact" role="tab" aria-controls="contact" aria-selected="false">Show ledger</a>
+          </li>
+        </ul>
     
-      <div class="tab-content" id="myTabContent">
-        <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
-    
+        <div class="tab-content" id="myTabContent">
+          <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
+            <div id="addskills">
+                <form>
+                  <div class="form-group">
+                    <label for="exampleFormControlInput1">Skill Name</label>
+                    <input type="text" class="form-control" id="SkillName" placeholder="EC2">
+                  </div>
+                  <div class="form-group">
+                    <label for="exampleFormControlSelect1">Skill Level</label>
+                    <select class="form-control" id="Rating">
+                      <option>101</option>
+                    <option>201</option>
+                    <option>301</option>
+                    <option>401</option>
+                    <option>501</option>
+                    </select>
+                  </div>
         
-          <div id="addskills">
-    
-            <form>
-              <div class="form-group">
-                <label for="exampleFormControlInput1">Skill Name</label>
-                <input type="text" class="form-control" id="SkillName" placeholder="EC2">
-              </div>
-              <div class="form-group">
-                <label for="exampleFormControlSelect1">Skill Level</label>
-                <select class="form-control" id="Rating">
-                  <option>101</option>
-                <option>201</option>
-                <option>301</option>
-                <option>401</option>
-                <option>501</option>
-                </select>
-              </div>
-    
-            <div><input type="hidden" value="Sascha" name="Owner" id="Owner"></div>
-       
-            
-            <button type="submit" class="btn btn-primary mb-2" onclick="createSkill()">Add Skill</button>
-          </form>
+                <div><input type="hidden" value="Sascha" name="Owner" id="Owner"></div>
+                <button type="submit" class="btn btn-primary mb-2" onclick="createSkill()">Add Skill</button>
+              </form>
             </div>
-       
-    
-          <table class="table" id="skill-table">
-            <thead>
-              <tr>
-                <th scope="col">#</th>
-                <th scope="col">Skill</th>
-                <th scope="col">Level</th>
-                <th scope="col">Name</th>
-              </tr>
-            </thead>
-            <tbody id="skills">
-              <tr>
-                <th scope="row">1</th>
-                <td>Mark</td>
-                <td>Otto</td>
-              </tr>
-              
-            </tbody>
-          </table>
-    
-    
-        </div>
-        <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
-    
-            Search
-    
-        </div>
-        <div class="tab-pane fade" id="contact" role="tabpanel" aria-labelledby="contact-tab">
-    
-            Ledger Balance
-    
-        </div>
-      </div>
         
-      </div>
+      
+            <table class="table" id="skill-table">
+              <thead>
+                <tr>
+                  <th scope="col">#</th>
+                  <th scope="col">Skill</th>
+                  <th scope="col">Level</th>
+                  <th scope="col">Name</th>
+                </tr>
+              </thead>
+              <tbody id="skills">
+                <tr>
+                  <th scope="row">1</th>
+                  <td>Mark</td>
+                  <td>Otto</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+      
+              Search
+      
+          </div>
+          <div class="tab-pane fade" id="contact" role="tabpanel" aria-labelledby="contact-tab">
+      
+              Ledger Balance
+      
+          </div>
+        </div>
+      
+        
     </div>
+  
   </div>
 
 </main>
@@ -174,8 +145,10 @@
     </p>
   </div>
 </footer>
-<script src="https://sdk.amazonaws.com/js/aws-sdk-2.5.4.min.js"></script>
 <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+<script src="https://sdk.amazonaws.com/js/aws-sdk-2.5.4.min.js"></script>
       
 <script>window.jQuery || document.write('<script src="/docs/4.4/assets/js/vendor/jquery.slim.min.js"><\/script>')</script><script src="/docs/4.4/dist/js/bootstrap.bundle.min.js" integrity="sha384-6khuMg9gaYr5AxOqhkVIODVIvm9ynTT5J4V1cfthmT+emCG6yVmEZsRHdxlotUnm" crossorigin="anonymous"></script></body>
 
