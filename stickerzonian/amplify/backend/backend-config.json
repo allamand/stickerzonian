@@ -1,0 +1,10 @@
+{
+	"auth": {
+		"stickerzonian0e06aea5": {
+			"service": "Cognito",
+			"providerPlugin": "awscloudformation",
+			"dependsOn": [],
+			"customAuth": false
+		}
+	}
+}
