@@ -6,15 +6,17 @@ export const getDeck = /* GraphQL */ `
     getDeck(id: $id) {
       id
       name
+      owner
+      members
       stickers {
         items {
           id
           bucket
+          labels
           owner
         }
         nextToken
       }
-      owner
     }
   }
 `;
@@ -28,10 +30,11 @@ export const listDecks = /* GraphQL */ `
       items {
         id
         name
+        owner
+        members
         stickers {
           nextToken
         }
-        owner
       }
       nextToken
     }
@@ -44,10 +47,11 @@ export const getSticker = /* GraphQL */ `
       deck {
         id
         name
+        owner
+        members
         stickers {
           nextToken
         }
-        owner
       }
       bucket
       fullsize {
@@ -60,6 +64,7 @@ export const getSticker = /* GraphQL */ `
         width
         height
       }
+      labels
       owner
     }
   }
@@ -77,6 +82,7 @@ export const listStickers = /* GraphQL */ `
           id
           name
           owner
+          members
         }
         bucket
         fullsize {
@@ -89,6 +95,7 @@ export const listStickers = /* GraphQL */ `
           width
           height
         }
+        labels
         owner
       }
       nextToken
