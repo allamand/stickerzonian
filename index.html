@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="google-site-verification" content="6-H4eCrXcL-bRPkxn3BTNq0q6RQJGI7IpuleirODJuQ" />
+  <link href='http://fonts.googleapis.com/css?family=Playfair+Display' rel='stylesheet' type='text/css'>
+  <link href='http://fonts.googleapis.com/css?family=Muli' rel='stylesheet' type='text/css'>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+
+  <meta name="google-signin-client_id" content="807912356860-n1p3v144kj0fnrghdf4a5ejlsvlrjfpg.apps.googleusercontent.com">
+  <style>
+    h1 {
+      font: 400 60px/1.5 'Playfair Display', Georgia, serif;
+    }
+
+    p {
+      font: 400 16px/1.6 'Muli', Verdana, Helvetica, sans-serif;
+    }
+
+    #mapid {
+      height: 180px;
+    }
+  </style>
+  <script src="https://sdk.amazonaws.com/js/aws-sdk-2.5.4.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+  <script src="https://apis.google.com/js/platform.js" async defer></script>
+  <script src="https://canvasjs.com/assets/script/jquery-1.11.1.min.js"></script>
+  <script src="https://canvasjs.com/assets/script/jquery.canvasjs.min.js"></script>
+  <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+
+
+  <script type="text/javascript">
+    var creds = new AWS.CognitoIdentityCredentials({
+      IdentityPoolId: 'us-east-1:a4c71c0b-a2ec-4625-a45c-27df34b68e99'
+    })
+    AWS.config.update({
+      region: 'us-east-1',
+      credentials: creds
+    });
+  </script>
+  <script>
+    jQuery("#subtitle").html("<table border=\"1\"><tr><td> Authentication Status </td><td> Guest </td></tr></table>");
+
+    function reloadIFrame() {
+      document.getElementById("countschart").src = countschart.src;
+    }
+
+    function onSignIn(googleUser) {
+
+      var profile = googleUser.getBasicProfile();
+      console.log('ID: ' + profile.getId()); // Do not send to your backend! Use an ID token instead.
+      console.log('Name: ' + profile.getName());
+      console.log('Image URL: ' + profile.getImageUrl());
+      console.log('Email: ' + profile.getEmail());
+      var id_token = googleUser.getAuthResponse().id_token;
+      creds.params.Logins = {};
+      creds.params.Logins['accounts.google.com'] = id_token;
+      creds.expired = true;
+
+      jQuery("#subtitle").html("<h1> Operation Center Dashboard </h1>");
+
+
+    }
+
+
+
+    function signOut() {
+      var auth2 = gapi.auth2.getAuthInstance();
+      auth2.signOut().then(function() {
+        console.log('User signed out.');
+        jQuery("#results").html("");
+        jQuery("#subtitle").html("<table border=\"1\"><tr><td> Authentication Status </td><td> Guest </td></tr></table>");
+        creds.expired = true;
+        AWS.config.credentials.clearCachedId();
+        location.reload();
+      });
+    }
+  </script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"></script>
+</head>
+
+
+<body class="d-flex flex-column h-100">
+  <div class="container">
+  <ul class="nav nav-tabs" id="myTab" role="tablist">
+    <li class="nav-item">
+      <a class="nav-link active" id="home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="home" aria-selected="true">Add Skill</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" id="profile-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="profile" aria-selected="false">Search Skill</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" id="contact-tab" data-toggle="tab" href="#contact" role="tab" aria-controls="contact" aria-selected="false">Show ledger</a>
+    </li>
+  </ul>
+
+  <div class="tab-content" id="myTabContent">
+    <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
+
+    
+      <div id="addskills">
+
+        <form>
+          <div class="form-group">
+            <label for="exampleFormControlInput1">Skill Name</label>
+            <input type="text" class="form-control" id="SkillName" placeholder="EC2">
+          </div>
+          <div class="form-group">
+            <label for="exampleFormControlSelect1">Skill Level</label>
+            <select class="form-control" id="Rating">
+              <option>101</option>
+            <option>201</option>
+            <option>301</option>
+            <option>401</option>
+            <option>501</option>
+            </select>
+          </div>
+
+        <div><input type="hidden" value="Sascha" name="Owner" id="Owner"></div>
+   
+        
+        <button type="submit" class="btn btn-primary mb-2" onclick="createSkill()">Add Skill</button>
+      </form>
+        </div>
+   
+
+      <table class="table" id="skill-table">
+        <thead>
+          <tr>
+            <th scope="col">#</th>
+            <th scope="col">Skill</th>
+            <th scope="col">Level</th>
+          </tr>
+        </thead>
+        <tbody id="skills">
+          <tr>
+            <th scope="row">1</th>
+            <td>Mark</td>
+            <td>Otto</td>
+          </tr>
+          
+        </tbody>
+      </table>
+
+
+    </div>
+    <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+
+        Search
+
+    </div>
+    <div class="tab-pane fade" id="contact" role="tabpanel" aria-labelledby="contact-tab">
+
+        Ledger Balance
+
+    </div>
+  </div>
+
+  <p id="signinout">
+    <table>
+      <tr>
+        <td>
+          <div class="g-signin2" data-onsuccess="onSignIn"></div>
+        </td>
+        <td>
+          <div id="customBtn"> <a href="#" onclick="signOut();">Sign out</a></div>
+        </td>
+      </tr>
+    </table>
+  </p>
+</div>
+</body>
+
+  <script>
+    window.onload = function() {
+
+      var skillsTable = new AWS.DynamoDB({
+        params: {
+          TableName: 'Skills'
+        }
+      });
+
+      skillsTable.scan({}, function(err, data) {
+        var skills = document.getElementById('skills');
+        skills.innerHTML = "";
+
+        jQuery.each(data.Items, function(index, item) {
+
+          skills.innerHTML = skills.innerHTML + '<td>' + item['Id']['S']+ '</td><td>' + item['SkillName']['S'] + '</td><td>' + item['Rating']['S'] + '</td>'
+          console.log(item['Id']['S']);
+        });
+      });
+
+      var requestsTable = new AWS.DynamoDB({
+        params: {
+          TableName: 'Request'
+        }
+      });
+
+      requestsTable.scan({}, function(err, data) {
+        var skills = document.getElementById('requests');
+        skills.innerHTML = "";
+
+        jQuery.each(data.Items, function(index, item) {
+
+          skills.innerHTML = '<div>' + item['Id']['S'] + '</div><div>' + item['Owner']['S'] + '</div><div>' + item['Accepted']['S'] + '</div><div>' + item['RequestedFrom']['S'] + '</div><div>' + item['Validated']['S'] + '</div>'
+
+        });
+      });
+
+      var requestsTable = new AWS.DynamoDB({
+        params: {
+          TableName: 'Request'
+        }
+      });
+
+      requestsTable.scan({}, function(err, data) {
+        var skills = document.getElementById('requests');
+        skills.innerHTML = "";
+
+        jQuery.each(data.Items, function(index, item) {
+
+          skills.innerHTML = '<div>' + item['Id']['S'] + '</div><div>' + item['Owner']['S'] + '</div><div>' + item['Accepted']['S'] + '</div><div>' + item['RequestedFrom']['S'] + '</div><div>' + item['Validated']['S'] + '</div>'
+
+        });
+      });
+
+      var ledgerTable = new AWS.DynamoDB({
+        params: {
+          TableName: 'KudoLedger'
+        }
+      });
+
+      ledgerTable.scan({}, function(err, data) {
+        var skills = document.getElementById('Ledger');
+        skills.innerHTML = "";
+
+        jQuery.each(data.Items, function(index, item) {
+
+          skills.innerHTML = '<div>' + item['Id']['S'] + '</div><div>' + item['Owner']['S'] + '</div><div>' + item['Purpose']['S'] + '</div><div>' + item['Value']['N'] + '</div>'
+
+        });
+      });
+
+
+    };
+
+    function createSkill() {
+      var owner = document.getElementById("Owner").value;
+      var skillname = document.getElementById('SkillName').value;
+      var rating = "" + document.getElementById('Rating').value;
+
+      var docClient = new AWS.DynamoDB.DocumentClient();
+
+      var params = {
+        TableName: 'Skills',
+        Item: {
+          "Id": uuidv4(),
+          "SkillName": skillname,
+          "Rating": rating,
+          "Owner": owner
+        }
+
+      }
+      console.log(params);
+      docClient.put(params, function(err, data) {
+        if (err) {
+          console.error("Unable to add item. Error JSON:", JSON.stringify(err, null, 2));
+        } else {
+          console.log("Added item:", JSON.stringify(data, null, 2));
+        }
+      });
+      location.reload();
+
+    }
+
+
+    function uuidv4() {
+      return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        var r = Math.random() * 16 | 0,
+          v = c == 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+      });
+    }
+  </script>
+</body>
+
+</html>
