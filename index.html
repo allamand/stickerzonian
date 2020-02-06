@@ -122,7 +122,7 @@
     
             <button type="submit" class="btn btn-primary mb-2" onclick="createSkill()">Search</button>
           </form>
-
+          
           <table class="table" id="skill-table">
             <thead>
               <tr>
@@ -150,14 +150,44 @@
 
           <div class="tab-pane fade" id="requested" role="tabpanel" aria-labelledby="requested-tab">
       
-            requested
+            <table class="table" id="skill-table">
+              <thead>
+                <tr>
+                  <th scope="col">Skill</th>
+                  <th scope="col">Requested From</th>
+                  <th scope="col">Date</th>
+                </tr>
+              </thead>
+              <tbody id="skills">
+                <tr>
+                  <th scope="row">EC2</th>
+                  <td>Hesham</td>
+                  <td>today</td>
+                </tr>
+              </tbody>
+            </table>
     
         </div>
 
           
           <div class="tab-pane fade" id="contact" role="tabpanel" aria-labelledby="contact-tab">
       
-              Ledger Balance
+            <table class="table" id="skill-table">
+              <thead>
+                <tr>
+                  <th scope="col">#</th>
+                  <th scope="col">Amount</th>
+                  <th scope="col">Purpose</th>
+                </tr>
+              </thead>
+              <tbody id="skills">
+                <tr>
+                  <th scope="row">1</th>
+                  <td>1000</td>
+                  <td>inital kudos</td>
+                </tr>
+              </tbody>
+            </table>
       
           </div>
         </div>
