@@ -1,6 +1,6 @@
 {
     "identityPoolName": "stickerzonian0e06aea5_identitypool_0e06aea5",
-    "allowUnauthenticatedIdentities": false,
+    "allowUnauthenticatedIdentities": true,
     "resourceNameTruncated": "sticke0e06aea5",
     "userPoolName": "stickerzonian0e06aea5_userpool_0e06aea5",
     "autoVerifiedAttributes": [
