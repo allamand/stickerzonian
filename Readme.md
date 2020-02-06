@@ -319,3 +319,412 @@ npm install --save uuid
 Update src/App.js with uploading part.
 
 
+### Add thumbnails
+
+update amplify/backend/function/S3Triggerxxxxxxx/src/index.js 
+
+```
+// amplify/backend/function/S3Triggerxxxxxxx/src/index.js
+
+const AWS = require('aws-sdk');
+const S3 = new AWS.S3({ signatureVersion: 'v4' });
+const DynamoDBDocClient = new AWS.DynamoDB.DocumentClient({apiVersion: '2012-08-10'});
+const uuidv4 = require('uuid/v4');
+
+/*
+Note: Sharp requires native extensions to be installed in a way that is compatible
+with Amazon Linux (in order to run successfully in a Lambda execution environment).
+
+If you're not working in Cloud9, you can follow the instructions on http://sharp.pixelplumbing.com/en/stable/install/#aws-lambda how to install the module and native dependencies.
+*/
+const Sharp = require('sharp');
+
+// We'll expect these environment variables to be defined when the Lambda function is deployed
+const THUMBNAIL_WIDTH = parseInt(process.env.THUMBNAIL_WIDTH, 10);
+const THUMBNAIL_HEIGHT = parseInt(process.env.THUMBNAIL_HEIGHT, 10);
+const DYNAMODB_PHOTOS_TABLE_NAME = process.env.DYNAMODB_PHOTOS_TABLE_ARN.split('/')[1];
+
+function storePhotoInfo(item) {
+	const params = {
+		Item: item,
+		TableName: DYNAMODB_PHOTOS_TABLE_NAME
+	};
+	return DynamoDBDocClient.put(params).promise();
+}
+
+async function getMetadata(bucketName, key) {
+	const headResult = await S3.headObject({Bucket: bucketName, Key: key }).promise();
+	return headResult.Metadata;
+}
+
+function thumbnailKey(filename) {
+	return `public/resized/${filename}`;
+}
+
+function fullsizeKey(filename) {
+	return `public/${filename}`;
+}
+
+function makeThumbnail(photo) {
+	return Sharp(photo).resize(THUMBNAIL_WIDTH, THUMBNAIL_HEIGHT).toBuffer();
+}
+
+async function resize(bucketName, key) {
+	const originalPhoto = (await S3.getObject({ Bucket: bucketName, Key: key }).promise()).Body;
+	const originalPhotoName = key.replace('uploads/', '');
+	const originalPhotoDimensions = await Sharp(originalPhoto).metadata();
+
+	const thumbnail = await makeThumbnail(originalPhoto);
+
+	await Promise.all([
+		S3.putObject({
+			Body: thumbnail,
+			Bucket: bucketName,
+			Key: thumbnailKey(originalPhotoName),
+		}).promise(),
+
+		S3.copyObject({
+			Bucket: bucketName,
+			CopySource: bucketName + '/' + key,
+			Key: fullsizeKey(originalPhotoName),
+		}).promise(),
+	]);
+
+	await S3.deleteObject({
+		Bucket: bucketName,
+		Key: key
+	}).promise();
+
+	return {
+		photoId: originalPhotoName,
+		
+		thumbnail: {
+			key: thumbnailKey(originalPhotoName),
+			width: THUMBNAIL_WIDTH,
+			height: THUMBNAIL_HEIGHT
+		},
+
+		fullsize: {
+			key: fullsizeKey(originalPhotoName),
+			width: originalPhotoDimensions.width,
+			height: originalPhotoDimensions.height
+		}
+	};
+};
+
+async function processRecord(record) {
+	const bucketName = record.s3.bucket.name;
+	const key = record.s3.object.key;
+	
+	if (key.indexOf('uploads') != 0) return;
+	
+	const metadata = await getMetadata(bucketName, key);
+	const sizes = await resize(bucketName, key);    
+	const id = uuidv4();
+	const item = {
+		id: id,
+		owner: metadata.owner,
+		photoAlbumId: metadata.albumid,
+		bucket: bucketName,
+		thumbnail: sizes.thumbnail,
+		fullsize: sizes.fullsize,
+		createdAt: new Date().getTime()
+	}
+	await storePhotoInfo(item);
+}
+
+exports.handler = async (event, context, callback) => {
+	try {
+		event.Records.forEach(processRecord);
+		callback(null, { status: 'Photo Processed' });
+	}
+	catch (err) {
+		console.error(err);
+		callback(err);
+	}
+};
+```
+
+and amplify/backend/function/S3Triggerxxxxxxx/src/package.json with the following:
+
+```
+{
+	"name": "S3TriggerPhotoProcessor",
+	"version": "1.0.0",
+	"description": "The photo uploads processor",
+	"main": "index.js",
+	"dependencies": {
+		"sharp": "^0.24.0",
+		"uuid": "^3.3.2"
+	}
+}
+```
+
+Then build the function
+
+```
+amplify function build
+```
+
+Replace photoalbums/amplify/backend/function/S3Triggerxxxxxxx/S3Triggerxxxxxxx-cloudformation-template.json with the following:
+
+```
+{
+	"AWSTemplateFormatVersion": "2010-09-09",
+	"Description": "Lambda resource stack creation using Amplify CLI",
+	"Parameters": {
+		"env": {
+			"Type": "String"
+		},
+		"DynamoDBPhotoTableArn": {
+			"Type": "String",
+			"Default": "DYNAMODB_PHOTO_TABLE_ARN_PLACEHOLDER"
+		}
+	},
+	"Conditions": {
+		"ShouldNotCreateEnvResources": {
+			"Fn::Equals": [
+				{
+					"Ref": "env"
+				},
+				"NONE"
+			]
+		}
+	},
+	"Resources": {
+		"LambdaFunction": {
+			"Type": "AWS::Lambda::Function",
+			"Metadata": {
+				"aws:asset:path": "./src",
+				"aws:asset:property": "Code"
+			},
+			"Properties": {
+				"Handler": "index.handler",
+				"FunctionName": {
+					"Fn::If": [
+						"ShouldNotCreateEnvResources",
+						"S3_TRIGGER_NAME_PLACEHOLDER",
+						{
+							"Fn::Join": [
+								"",
+								[
+									"S3_TRIGGER_NAME_PLACEHOLDER",
+									"-",
+									{
+										"Ref": "env"
+									}
+								]
+							]
+						}
+					]
+				},
+				"Environment": {
+					"Variables": {
+						"ENV": {
+							"Ref": "env"
+						},
+						"THUMBNAIL_WIDTH": "80",
+						"THUMBNAIL_HEIGHT": "80",
+						"DYNAMODB_PHOTOS_TABLE_ARN": { "Ref" : "DynamoDBPhotoTableArn" }
+					}
+				},
+				"Role": {
+					"Fn::GetAtt": [
+						"LambdaExecutionRole",
+						"Arn"
+					]
+				},
+				"Runtime": "nodejs10.x",
+				"Timeout": "25"
+			}
+		},
+		"LambdaExecutionRole": {
+			"Type": "AWS::IAM::Role",
+			"Properties": {
+				"RoleName": {
+					"Fn::If": [
+						"ShouldNotCreateEnvResources",
+						"S3_TRIGGER_NAME_PLACEHOLDERLambdaRole66924eb7",
+						{
+							"Fn::Join": [
+								"",
+								[
+									"S3_TRIGGER_NAME_PLACEHOLDERLambdaRole66924eb7",
+									"-",
+									{
+										"Ref": "env"
+									}
+								]
+							]
+						}
+					]
+				},
+				"AssumeRolePolicyDocument": {
+					"Version": "2012-10-17",
+					"Statement": [
+						{
+							"Effect": "Allow",
+							"Principal": {
+								"Service": [
+									"lambda.amazonaws.com"
+								]
+							},
+							"Action": [
+								"sts:AssumeRole"
+							]
+						}
+					]
+				}
+			}
+		},
+		"lambdaexecutionpolicy": {
+			"DependsOn": [
+				"LambdaExecutionRole"
+			],
+			"Type": "AWS::IAM::Policy",
+			"Properties": {
+				"PolicyName": "lambda-execution-policy",
+				"Roles": [
+					{
+						"Ref": "LambdaExecutionRole"
+					}
+				],
+				"PolicyDocument": {
+					"Version": "2012-10-17",
+					"Statement": [
+						{
+							"Effect": "Allow",
+							"Action": [
+								"logs:CreateLogGroup",
+								"logs:CreateLogStream",
+								"logs:PutLogEvents"
+							],
+							"Resource": {
+								"Fn::Sub": [
+									"arn:aws:logs:${region}:${account}:log-group:/aws/lambda/${lambda}:log-stream:*",
+									{
+										"region": {
+											"Ref": "AWS::Region"
+										},
+										"account": {
+											"Ref": "AWS::AccountId"
+										},
+										"lambda": {
+											"Ref": "LambdaFunction"
+										}
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		},
+		"AllPrivsForDynamo": {
+			"DependsOn": [
+				"LambdaExecutionRole"
+			],
+			"Type": "AWS::IAM::Policy",
+			"Properties": {
+				"PolicyName": "AllPrivsForDynamo",
+				"Roles": [
+					{
+						"Ref": "LambdaExecutionRole"
+					}
+				],
+				"PolicyDocument": {
+					"Version": "2012-10-17",
+					"Statement": [
+						{
+							"Effect": "Allow",
+							"Action": [
+								"dynamodb:*"
+							],
+							"Resource": { "Ref" : "DynamoDBPhotoTableArn" }
+						}
+					]
+				}
+			}
+		},
+		"RekognitionDetectLabels": {
+			"DependsOn": [
+				"LambdaExecutionRole"
+			],
+			"Type": "AWS::IAM::Policy",
+			"Properties": {
+				"PolicyName": "RekognitionDetectLabels",
+				"Roles": [
+					{
+						"Ref": "LambdaExecutionRole"
+					}
+				],
+				"PolicyDocument": {
+					"Version": "2012-10-17",
+					"Statement": [
+						{
+							"Effect": "Allow",
+							"Action": [
+								"rekognition:detectLabels"
+							],
+							"Resource": "*"
+						}
+					]
+				}
+			}
+		}
+	},
+	"Outputs": {
+		"Name": {
+			"Value": {
+				"Ref": "LambdaFunction"
+			}
+		},
+		"Arn": {
+			"Value": {
+				"Fn::GetAtt": [
+					"LambdaFunction",
+					"Arn"
+				]
+			}
+		},
+		"Region": {
+			"Value": {
+				"Ref": "AWS::Region"
+			}
+		},
+		"LambdaExecutionRole": {
+			"Value": {
+				"Ref": "LambdaExecutionRole"
+			}
+		}
+	}
+}
+```
+
+Update placeholders from previous template with
+
+```
+AMPLIFY_ENV=$(jq -r '.envName' amplify/.config/local-env-info.json)
+
+REGION=$(jq -r '.providers.awscloudformation.Region' amplify/backend/amplify-meta.json)
+
+STACK_ID=$(jq -r '.providers.awscloudformation.StackId' amplify/backend/amplify-meta.json)
+
+ACCOUNT_ID=$(echo $STACK_ID | sed -r 's/^arn:aws:(.+):(.+):(.+):stack.+$/\3/')
+
+API_ID=$(jq -r '.api.stickerzonian.output.GraphQLAPIIdOutput' amplify/backend/amplify-meta.json)
+
+DYNAMO_DB_PHOTO_TABLE_ARN="arn:aws:dynamodb:$REGION:$ACCOUNT_ID:table/Sticker-$API_ID-$AMPLIFY_ENV"
+
+S3_TRIGGER_NAME=$(jq -r '.function | to_entries[] | .key' amplify/backend/amplify-meta.json)
+
+sed -i "s/S3_TRIGGER_NAME_PLACEHOLDER/$S3_TRIGGER_NAME/g" amplify/backend/function/$S3_TRIGGER_NAME/$S3_TRIGGER_NAME-cloudformation-template.json
+
+sed -i "s,DYNAMODB_PHOTO_TABLE_ARN_PLACEHOLDER,$DYNAMO_DB_PHOTO_TABLE_ARN,g" amplify/backend/function/$S3_TRIGGER_NAME/$S3_TRIGGER_NAME-cloudformation-template.json
+```
+
+If Ok, then just push your changes
+
+```
+amplify push
+```
