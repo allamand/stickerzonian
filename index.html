@@ -76,7 +76,7 @@
         <div class="tab-content" id="myTabContent">
           <div class="tab-pane fade show active" id="skill" role="tabpanel" aria-labelledby="skill-tab">
             <div id="addskills">
-                <form>
+                <form class="mt-1">
                   <div class="form-group">
                     <label for="exampleFormControlInput1">Skill Name</label>
                     <input type="text" class="form-control" id="SkillName" >
@@ -118,7 +118,7 @@
           </div>
           <div class="tab-pane fade" id="search" role="tabpanel" aria-labelledby="search-tab">
 
-            <form>
+            <form class="mt-1">
               <div class="form-group">
                 <label for="exampleFormControlInput1">Search Skill</label>
                 <input type="text"class="form-control" id="searchtxt" placeholder="EC2">
@@ -178,25 +178,32 @@
 
 
           <div class="tab-pane fade" id="ledger" role="tabpanel" aria-labelledby="ledger-tab">
-
-            <div> Total: <span id="ledgerSum" class="badge badge-info"></span> </div>
-
-            <table class="table" id="ledger-table">
-              <thead>
-                <tr>
-                  <th scope="col">#</th>
-                  <th scope="col">Amount</th>
-                  <th scope="col">Purpose</th>
-                </tr>
-              </thead>
-              <tbody id="tbledger">
-                <tr>
-                  <th scope="row">1</th>
-                  <td>1000</td>
-                  <td>inital kudos</td>
-                </tr>
-              </tbody>
-            </table>
+            <div class="row mt-1">
+              <div class="col-12">
+              <div> Total: <span id="ledgerSum" class="badge badge-info"></span> </div>
+              </div>
+            </div>
+            <div class="row mt-2">
+              <div class="col-12">
+                <table class="table" id="ledger-table">
+                  <thead>
+                    <tr>
+                      <th scope="col">#</th>
+                      <th scope="col">Amount</th>
+                      <th scope="col">Purpose</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tbledger">
+                    <tr>
+                      <th scope="row">1</th>
+                      <td>1000</td>
+                      <td>inital kudos</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            
 
           </div>
         </div>
@@ -364,7 +371,14 @@
       });
     });
 
-// Show Ledger
+    // Show Ledger
+    loadLedger()
+
+
+  };
+
+  function loadLedger() {
+    console.log("load new ledger data.")
     var ledgerTable = new AWS.DynamoDB({
       params: {
         TableName: 'KudoLedger'
@@ -384,7 +398,6 @@
       jQuery("#ledgerSum").html(ledgerSum)
 
     });
-
 
     // Show Leaderboard
     var kudosTable = new AWS.DynamoDB({
@@ -490,6 +503,7 @@
 
   $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
     console.log("tab changed to " + e.target)
+    loadLedger()
   })
 </script>
 
