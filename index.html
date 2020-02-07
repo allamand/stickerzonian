@@ -179,6 +179,8 @@
 
           <div class="tab-pane fade" id="ledger" role="tabpanel" aria-labelledby="ledger-tab">
 
+            <div> Total: <span id="ledgerSum" class="badge badge-info"></span> </div>
+
             <table class="table" id="ledger-table">
               <thead>
                 <tr>
@@ -370,11 +372,14 @@
       var elem = document.getElementById('tbledger');
       elem.innerHTML = "";
 
+      var ledgerSum = 0;
       jQuery.each(data.Items, function(index, item) {
-
-        elem.innerHTML = '<div>' + item['Id']['S'] + '</div><div>' + item['Owner']['S'] + '</div><div>' + item['Purpose']['S'] + '</div><div>' + item['Value']['N'] + '</div>'
-
+        elem.innerHTML = '<td>' + item['Id']['S'] + '</td><td>' + item['Purpose']['S'] + '</td><td>' + item['Value']['N'] + '</td>'
+        ledgerSum = ledgerSum + parseInt(item['Value']['N'])
       });
+
+      jQuery("#ledgerSum").html(ledgerSum)
+
     });
 
 
