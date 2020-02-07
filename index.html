@@ -448,6 +448,10 @@
       return v.toString(16);
     });
   }
+
+  $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+    console.log("tab changed to " + e.target)
+  })
 </script>
 
 <script>
