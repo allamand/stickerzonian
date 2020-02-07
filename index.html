@@ -368,7 +368,14 @@
       });
     });
 
-// Show Ledger
+    // Show Ledger
+    loadLedger()
+
+
+  };
+
+  function loadLedger() {
+    console.log("load new ledger data.")
     var ledgerTable = new AWS.DynamoDB({
       params: {
         TableName: 'KudoLedger'
@@ -388,9 +395,7 @@
       jQuery("#ledgerSum").html(ledgerSum)
 
     });
-
-
-  };
+  }
 
   function createSkill() {
     var owner = document.getElementById("Owner").value;
@@ -458,6 +463,7 @@
 
   $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
     console.log("tab changed to " + e.target)
+    loadLedger()
   })
 </script>
 
