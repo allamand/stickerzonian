@@ -36,14 +36,14 @@
   </head>
   <body>
     <header>
-  
+
   <div class="navbar navbar-dark bg-dark shadow-sm">
     <div class="container d-flex justify-content-between">
       <a href="#" class="navbar-brand d-flex align-items-center">
         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" aria-hidden="true" class="mr-2" viewBox="0 0 24 24" focusable="false"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
         <strong>digitalKudos</strong>
       </a>
-    
+
     </div>
   </div>
 </header>
@@ -61,13 +61,13 @@
             <a class="nav-link" id="search-tab" data-toggle="tab" href="#search" role="tab" aria-controls="search" aria-selected="false">Search Skill</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" id="requested-tab" data-toggle="tab" href="#requested" role="tab" aria-controls="requested" aria-selected="false">Requested Skills</a>
+            <a class="nav-link" id="requested-tab" data-toggle="tab" href="#requested" role="tab" aria-controls="requested" aria-selected="false">Skills Requests</a>
           </li>
           <li class="nav-item">
             <a class="nav-link" id="ledger-tab" data-toggle="tab" href="#ledger" role="tab" aria-controls="ledger" aria-selected="false">Show ledger</a>
           </li>
         </ul>
-    
+
         <div class="tab-content" id="myTabContent">
           <div class="tab-pane fade show active" id="skill" role="tabpanel" aria-labelledby="skill-tab">
             <div id="addskills">
@@ -86,13 +86,13 @@
                     <option>501</option>
                     </select>
                   </div>
-        
+
                 <div><input type="hidden" value="Sascha" name="Owner" id="Owner"></div>
-                <button type="submit" class="btn btn-primary mb-2" onclick="createSkill()">Add Skill</button>
+                <button type="button" class="btn btn-primary mb-2" onclick="createSkill()">Add Skill</button>
               </form>
             </div>
-        
-      
+
+
             <table class="table" id="skill-table">
               <thead>
                 <tr>
@@ -112,18 +112,18 @@
             </table>
           </div>
           <div class="tab-pane fade" id="search" role="tabpanel" aria-labelledby="search-tab">
-      
+
             <form>
               <div class="form-group">
                 <label for="exampleFormControlInput1">Search Skill</label>
-                <input type="text" class="form-control" id="SearchName" placeholder="EC2">
+                <input type="text"class="form-control" id="searchtxt" placeholder="EC2">
               </div>
-              
-    
-            <button type="submit" class="btn btn-primary mb-2" onclick="searchSkill()">Search</button>
+
+
+            <button type="button"  onclick="searchSkillForRequest()" class="btn btn-primary mb-3" >Search</button>
           </form>
-          
-          <table class="table" id="search-table">
+
+          <table class="table" id="skill-table">
             <thead>
               <tr>
                 <th scope="col">#</th>
@@ -131,25 +131,27 @@
                 <th scope="col">Name</th>
                 <th scope="col">Rating</th>
                 <th scope="col">Kudo</th>
+                <th scope="col">Description</th>
                 <th scope="col">Request</th>
               </tr>
             </thead>
-            <tbody id="tbsearch">
+            <tbody id="searchedskills">
               <tr>
                 <th scope="row">1</th>
                 <td>EC2</td>
                 <td>Sascha</td>
                 <td>101</td>
                 <td>10</td>
-                <td><button class="btn btn-secondary" onclick="createRequest()">Request</button></td>
+                <td><input type=text class="" placeholder="Reason"/></td>
+                <td><button class="btn btn-secondary" onclick="createRequest()" >Request</button></td>
               </tr>
             </tbody>
           </table>
-      
+
           </div>
 
           <div class="tab-pane fade" id="requested" role="tabpanel" aria-labelledby="requested-tab">
-      
+
             <table class="table" id="requested-table">
               <thead>
                 <tr>
@@ -166,12 +168,12 @@
                 </tr>
               </tbody>
             </table>
-    
+
         </div>
 
-          
+
           <div class="tab-pane fade" id="ledger" role="tabpanel" aria-labelledby="ledger-tab">
-      
+
             <table class="table" id="ledger-table">
               <thead>
                 <tr>
@@ -188,13 +190,13 @@
                 </tr>
               </tbody>
             </table>
-      
+
           </div>
         </div>
-      
-        
+
+
     </div>
-  
+
   </div>
 
 </main>
@@ -221,7 +223,7 @@
 <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
 <script src="https://sdk.amazonaws.com/js/aws-sdk-2.5.4.min.js"></script>
-      
+
 <script>window.jQuery || document.write('<script src="/docs/4.4/assets/js/vendor/jquery.slim.min.js"><\/script>')</script><script src="/docs/4.4/dist/js/bootstrap.bundle.min.js" integrity="sha384-6khuMg9gaYr5AxOqhkVIODVIvm9ynTT5J4V1cfthmT+emCG6yVmEZsRHdxlotUnm" crossorigin="anonymous"></script></body>
 
       <script type="text/javascript">
@@ -235,13 +237,13 @@
       </script>
       <script>
         jQuery("#subtitle").html("<table border=\"1\"><tr><td> Authentication Status </td><td> Guest </td></tr></table>");
-    
+
         function reloadIFrame() {
           document.getElementById("countschart").src = countschart.src;
         }
-    
+
         function onSignIn(googleUser) {
-    
+
           var profile = googleUser.getBasicProfile();
           console.log('ID: ' + profile.getId()); // Do not send to your backend! Use an ID token instead.
           console.log('Name: ' + profile.getName());
@@ -251,14 +253,14 @@
           creds.params.Logins = {};
           creds.params.Logins['accounts.google.com'] = id_token;
           creds.expired = true;
-    
+
           jQuery("#subtitle").html("<h1> Operation Center Dashboard </h1>");
-    
-    
+
+
         }
-    
-    
-    
+
+
+
         function signOut() {
           var auth2 = gapi.auth2.getAuthInstance();
           auth2.signOut().then(function() {
@@ -306,13 +308,13 @@
 
       jQuery.each(data.Items, function(index, item) {
         if (item['SkillName']['S'] == 'SKI'){
-          elem.innerHTML = elem.innerHTML + '<td>' + item['Id']['S'] + '</td><td>' + 
-          item['SkillName']['S'] + '</td><td>' + 
-          item['Rating']['S'] + '</td><td>' + 
+          elem.innerHTML = elem.innerHTML + '<td>' + item['Id']['S'] + '</td><td>' +
+          item['SkillName']['S'] + '</td><td>' +
+          item['Rating']['S'] + '</td><td>' +
           item['Owner']['S'] + '</td><td>' +
           '<td><button class="btn btn-secondary" onclick="createRequest("'+item['Id']['S']+'")">Request</button></td>'
         }
-        
+
       });
     });
 
@@ -380,38 +382,36 @@
         console.log("Added item:", JSON.stringify(data, null, 2));
       }
     });
-    location.reload();
 
   }
 
-  function searchSkill() {
-    var owner = document.getElementById("Owner").value;
-    var skillname = document.getElementById('SearchName').value;
-    var rating = "" + document.getElementById('Rating').value;
-
-    var docClient = new AWS.DynamoDB.DocumentClient();
-
-    var params = {
-      TableName: 'Skills',
-      Item: {
-        "Id": uuidv4(),
-        "SkillName": skillname,
-        "Rating": rating,
-        "Owner": owner
-      }
-
-    }
-    console.log(params);
-    docClient.get(params, function(err, data) {
-      if (err) {
-        console.error("Unable to read item. Error JSON:", JSON.stringify(err, null, 2));
-      } else {
-        console.log("Get item:", JSON.stringify(data, null, 2));
+  function searchSkillForRequest(){
+    document.getElementById('skill-tab').setAttribute("aria-selected","false");
+    document.getElementById('search-tab').setAttribute("aria-selected","true");
+    var skillsTable = new AWS.DynamoDB({
+      params: {
+        TableName: 'Skills'
       }
     });
-    location.reload();
 
+    skillsTable.scan({}, function(err, data) {
+      var skills = document.getElementById('searchedskills');
+      var searchinput = document.getElementById('searchtxt').value;
+      skills.innerHTML = "";
+
+      jQuery.each(data.Items, function(index, item) {
+        console.log(item['SkillName']['S']);
+        console.log(searchinput);
+        if(item['SkillName']['S']==searchinput)
+          skills.innerHTML = skills.innerHTML + '<td> <input type="hidden" id="skillid'+item['Id']['S']+'" value="' + item['Id']['S']+ '"/>' + item['Id']['S']+ '</td><td>'
+            + item['SkillName']['S'] + '</td><td> <input type="hidden" id="owner'+item['Id']['S']+'" value="' + item['Owner']['S']+ '"/>'
+            + item['Owner']['S']+ '</td><td>'
+            + item['Rating']['S'] + '</td><td>10</td><td><input type=text id=desc'
+            +item['Id']['S']+' placeholder="Reason"/></td><td> <button class="btn btn-secondary" onclick="createRequest(\''+item['Id']['S']+'\')">Request</button> </td>'
+      });
+    });
   }
+
 
   function uuidv4() {
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
@@ -423,8 +423,3 @@
 </script>
 
  </html>
-
-
-
-
-
