@@ -311,7 +311,7 @@
  <script>
   window.onload = function() {
 
-//Add Skill
+    //Add Skill
     var skillsTable = new AWS.DynamoDB({
       params: {
         TableName: 'Skills'
@@ -329,7 +329,7 @@
       });
     });
 
-// Search Skill
+    // Search Skill
     var skillsTable = new AWS.DynamoDB({
       params: {
         TableName: 'Skills'
@@ -353,7 +353,7 @@
       });
     });
 
-//Requested Skills
+    //Requested Skills
     var requestsTable = new AWS.DynamoDB({
       params: {
         TableName: 'Request'
@@ -372,8 +372,9 @@
     });
 
     // Show Ledger
-    loadLedger()
-
+    loadLedger();
+    //show leaderboard
+    loadLeaderBoard();
 
   };
 
@@ -398,7 +399,9 @@
       jQuery("#ledgerSum").html(ledgerSum)
 
     });
+  };
 
+  function loadLeaderBoard() {
     // Show Leaderboard
     var kudosTable = new AWS.DynamoDB({
       params: {
@@ -416,12 +419,8 @@
         var k = item['Users']['S'];
         var v = item['kudos']['N'];
           kudosObjects[k]=v;
-      });
-
-   //        elem.innerHTML = elem.innerHTML + '<li class="list-group-item"> <span class="badge badge-pill badge-secondary">'+index+'</span> '+item['Users']['S']+' ('+item['kudos']['N']+')</li>'        
-   
-      var keys = Object.keys(kudosObjects);
-      
+      });    
+      var keys = Object.keys(kudosObjects);          
       keys = keys.sort(function(a, b) {
         return kudosObjects[b] - kudosObjects[a];
       });
@@ -433,9 +432,8 @@
 
     });
 
-
-
   };
+
 
   function createSkill() {
     var owner = document.getElementById("Owner").value;
@@ -504,6 +502,7 @@
   $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
     console.log("tab changed to " + e.target)
     loadLedger()
+    loadLeaderBoard();
   })
 </script>
 
