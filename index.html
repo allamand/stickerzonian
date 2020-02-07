@@ -392,7 +392,9 @@
 
       var ledgerSum = 0;
       jQuery.each(data.Items, function(index, item) {
-        elem.innerHTML = '<td>' + item['Id']['S'] + '</td><td>' + item['Purpose']['S'] + '</td><td>' + item['Value']['N'] + '</td>'
+        if (item['Owner']['S'] != "Sascha") return
+
+        elem.innerHTML += '<td>' + item['Id']['S'] + '</td><td>' + item['Purpose']['S'] + '</td><td>' + item['Value']['N'] + '</td>'
         ledgerSum = ledgerSum + parseInt(item['Value']['N'])
       });
 
